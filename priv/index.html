@@ -4,22 +4,8 @@
         <title>Hello!</title>
     </head>
     <body>
-        <h1>Hi!</h1>
-
-        <script type="text/javascript">
-            ws = new WebSocket("ws://127.0.0.1:8080/websockets");
-
-            ws.onopen = function() {
-                console.log("Connected!");
-            };
-
-            ws.onmessage = function(evt) {
-                console.log(evt.data);
-            };
-
-            ws.onclose = function() {
-                console.log("Connection closed!");
-            };
-        </script>
+        <script type="text/javascript" src="js/vendor/jquery.js"></script>
+        <script type="text/javascript" src="js/vendor/amplify.js"></script>
+        <script type="text/javascript" src="js/application.js"></script>
     </body>
 </html>
