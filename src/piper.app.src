@@ -1,0 +1,14 @@
+{application, piper, [
+  {description, "Piper, the red, red worm."},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib,
+    crypto,
+    cowboy
+  ]},
+  {mod, {piper_app, []}},
+  {env, []}
+]}.
