@@ -21,5 +21,11 @@ start_link() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    Procs = [],
-    {ok, {{one_for_one, 10, 10}, Procs}}.
+    PiperSession = {piper_session,
+                       {piper_session, start_link, []},
+                       permanent,
+                       5000,
+                       worker,
+                       [piper_session]},
+    Processes = [PiperSession],
+    {ok, {{one_for_one, 10, 10}, Processes}}.

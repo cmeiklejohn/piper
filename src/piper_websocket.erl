@@ -2,7 +2,7 @@
 %% @copyright 2012 Christopher Meiklejohn
 %% @doc Piper application.
 
--module(piper_websockets_handler).
+-module(piper_websocket).
 -author('Christopher Meiklejohn <cmeiklejohn@basho.com>').
 
 -export([init/3]).
@@ -16,16 +16,22 @@ init({tcp, http}, _Req, _Opts) ->
     {upgrade, protocol, cowboy_websocket}.
 
 websocket_init(_TransportName, Req, _Opts) ->
-    erlang:start_timer(1000, self(), <<"Hello!">>),
+    Message = {struct, [{type, generic}, {payload, <<"Hello!">>}]},
+    EncodedMessage = mochijson2:encode(Message),
+    erlang:start_timer(1000, self(), EncodedMessage),
     {ok, Req, undefined_state}.
 
-websocket_handle({text, Msg}, Req, State) ->
-    {reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
+websocket_handle({text, _Msg}, Req, State) ->
+    Message = {struct, [{type, generic}, {payload, <<"Got it!">>}]},
+    EncodedMessage = mochijson2:encode(Message),
+    {reply, {text, EncodedMessage}, Req, State};
 websocket_handle(_Data, Req, State) ->
     {ok, Req, State}.
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
-    erlang:start_timer(1000, self(), <<"How' you doin'?">>),
+    Message = {struct, [{type, generic}, {payload, <<"How' you doin'?">>}]},
+    EncodedMessage = mochijson2:encode(Message),
+    erlang:start_timer(1000, self(), EncodedMessage),
     {reply, {text, Msg}, Req, State};
 websocket_info(_Info, Req, State) ->
     {ok, Req, State}.

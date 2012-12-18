@@ -10,14 +10,15 @@
 %% API.
 -export([start/2, stop/1]).
 
-%% API.
-start(_Type, _Args) ->
+%% @spec start(_Type, _StartArgs) -> ServerRet
+%% @doc application start callback for piper.
+start(_Type, _StartArgs) ->
     Listener = http,
     Port = 8080,
     NumberOfAcceptors = 100,
     Dispatch = [
         {'_', [
-            {[<<"websockets">>], piper_websockets_handler, []},
+            {[<<"websocket">>], piper_websocket, []},
             {['...'], cowboy_static, [
                 {directory, {priv_dir, piper, []}},
                 {mimetypes, {fun mimetypes:path_to_mimes/2, default}}
@@ -37,5 +38,6 @@ start(_Type, _Args) ->
             piper_sup:start_link()
     end.
 
+%% @doc application stop callback for piper.
 stop(_State) ->
     ok.
