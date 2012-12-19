@@ -15,28 +15,38 @@
 init({tcp, http}, _Req, _Opts) ->
     {upgrade, protocol, cowboy_websocket}.
 
+%% @doc Register client with the gen_server initially when connected.
 websocket_init(_TransportName, Req, _Opts) ->
-    Message = {struct, [{type, generic}, {payload, <<"Hello!">>}]},
-    EncodedMessage = mochijson2:encode(Message),
-    erlang:start_timer(1000, self(), EncodedMessage),
+    ok = piper_session:register_client(self()),
     {ok, Req, undefined_state}.
 
-websocket_handle({text, _Msg}, Req, State) ->
-    Message = {struct, [{type, generic}, {payload, <<"Got it!">>}]},
-    EncodedMessage = mochijson2:encode(Message),
-    {reply, {text, EncodedMessage}, Req, State};
+%% @doc Each time a message is received from the client, decode the
+%% message and send to the gen server.
+websocket_handle({text, Msg}, Req, State) ->
+    Res = case mochijson2:decode(Msg) of
+        {struct, _} = Struct ->
+            {struct, Atomized} = atomize(Struct),
+            RawMessage = proplists:get_value(message, Atomized),
+            Message = binary_to_atom(RawMessage),
+            gen_server:cast(piper_session, {Message, self()}),
+            ok;
+        _ ->
+            ok
+    end,
+    {Res, Req, State};
 websocket_handle(_Data, Req, State) ->
     {ok, Req, State}.
 
-websocket_info({timeout, _Ref, Msg}, Req, State) ->
-    Message = {struct, [{type, generic}, {payload, <<"How' you doin'?">>}]},
-    EncodedMessage = mochijson2:encode(Message),
-    erlang:start_timer(1000, self(), EncodedMessage),
-    {reply, {text, Msg}, Req, State};
+%% @doc When we receive a response, turn the X-tuple into a message back
+%% to the client over the websocket channel.
+websocket_info({Type, Message}, Req, State) ->
+    Response = mochijson2:encode({struct, [{type, Type}, {message, Message}]}),
+    {reply, {text, Response}, Req, State};
 websocket_info(_Info, Req, State) ->
     {ok, Req, State}.
 
 websocket_terminate(_Reason, _Req, _State) ->
+    ok = piper_session:deregister_client(self()),
     ok.
 
 %%%===================================================================
