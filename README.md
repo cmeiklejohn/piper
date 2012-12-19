@@ -27,8 +27,7 @@ amplify.publish(client_count, 1);
 ```
 
 This allows multiple consumers in your JavaScript application to
-subscribe to these messages and respond to them accordingly, rather than
-having to hard code a function call such as ```fill_div```, etc.
+subscribe to these messages and respond to them accordingly.
 
 ## License
 
