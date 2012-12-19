@@ -38,3 +38,21 @@ websocket_info(_Info, Req, State) ->
 
 websocket_terminate(_Reason, _Req, _State) ->
     ok.
+
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
+
+%% @doc Taken from Joe Armstrong's EZWebFrame
+%%      https://github.com/joearms/ezwebframe
+atomize({struct,L}) ->
+    {struct, [{binary_to_atom(I), atomize(J)} || {I, J} <- L]};
+atomize(L) when is_list(L) ->
+    [atomize(I) || I <- L];
+atomize(X) ->
+    X.
+
+%% @doc Taken from Joe Armstrong's EZWebFrame
+%%      https://github.com/joearms/ezwebframe
+binary_to_atom(B) ->
+    list_to_atom(binary_to_list(B)).
