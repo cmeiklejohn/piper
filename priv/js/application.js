@@ -18,7 +18,11 @@
      ** Application developers should subscribe to these events with
      ** application specific behaviour. */
     ws.onmessage = function(evt) {
-        amplify.publish("client", JSON.parse(evt.data));
+        var data    = JSON.parse(evt.data);
+        var type    = data.type;
+        var message = data.message;
+
+        amplify.publish(type, message);
     };
 
     /** Listener which subscribes to server events, and sends them back
@@ -28,8 +32,8 @@
     });
 
     /** Example listener which logs each published message. */
-    amplify.subscribe("client", function(data) {
-        console.log(data);
+    amplify.subscribe("client_count", function(data) {
+        $("#client_count").html(data);
     });
 
     /** Example polling routine which sends messages back to the server,
