@@ -10,7 +10,8 @@
 %% API
 -export([start_link/0,
          clients/0,
-         register_client/1]).
+         register_client/1,
+         deregister_client/1]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -34,6 +35,9 @@ start_link() ->
 register_client(Pid) ->
     gen_server:call(?MODULE, {register_client, Pid}, infinity).
 
+deregister_client(Pid) ->
+    gen_server:call(?MODULE, {deregister_client, Pid}, infinity).
+
 clients() ->
     gen_server:call(?MODULE, clients, infinity).
 
@@ -52,9 +56,16 @@ handle_call(count_clients, _From, State) ->
 handle_call({register_client, Pid}, _From, State) ->
     NewClients = register_client(Pid, State#state.clients),
     {reply, ok, State#state{clients=NewClients}};
+handle_call({deregister_client, Pid}, _From, State) ->
+    NewClients = deregister_client(Pid, State#state.clients),
+    {reply, ok, State#state{clients=NewClients}};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
+handle_cast({count_clients, Pid}, State) ->
+    Count = count_clients(State#state.clients),
+    Pid ! {client_count, Count},
+    {noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -75,6 +86,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% @doc Register a new client.
 register_client(Pid, Clients) ->
     sets:add_element(Pid, Clients).
+
+%% @spec dwregister_client(pid(), set()) -> set()
+%% @doc Deregister a new client.
+deregister_client(Pid, Clients) ->
+    sets:del_element(Pid, Clients).
 
 %% @spec count_clients(set()) -> number()
 %% @doc Count clients.
