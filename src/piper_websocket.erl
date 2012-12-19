@@ -27,7 +27,7 @@ websocket_handle({text, Msg}, Req, State) ->
         {struct, _} = Struct ->
             {struct, Atomized} = atomize(Struct),
             RawMessage = proplists:get_value(message, Atomized),
-            Message = binary_to_atom(RawMessage),
+            Message = binary_to_atom(RawMessage, utf8),
             gen_server:cast(piper_session, {Message, self()}),
             ok;
         _ ->
@@ -53,16 +53,11 @@ websocket_terminate(_Reason, _Req, _State) ->
 %%% Internal functions
 %%%===================================================================
 
-%% @doc Taken from Joe Armstrong's EZWebFrame
+%% @doc Taken from Joe Armstrong's Ezwebframe
 %%      https://github.com/joearms/ezwebframe
 atomize({struct,L}) ->
-    {struct, [{binary_to_atom(I), atomize(J)} || {I, J} <- L]};
+    {struct, [{binary_to_atom(I, utf8), atomize(J)} || {I, J} <- L]};
 atomize(L) when is_list(L) ->
     [atomize(I) || I <- L];
 atomize(X) ->
     X.
-
-%% @doc Taken from Joe Armstrong's EZWebFrame
-%%      https://github.com/joearms/ezwebframe
-binary_to_atom(B) ->
-    list_to_atom(binary_to_list(B)).
