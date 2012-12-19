@@ -18,16 +18,25 @@
      ** Application developers should subscribe to these events with
      ** application specific behaviour. */
     ws.onmessage = function(evt) {
-        var data    = JSON.parse(evt.data);
-        var type    = data.type;
-        var payload = data.payload;
-
-        amplify.publish(type, payload);
+        amplify.publish("client", JSON.parse(evt.data));
     };
 
+    /** Listener which subscribes to server events, and sends them back
+     ** over the web socket. */
+    amplify.subscribe("server", function(data) {
+        ws.send(JSON.stringify(data));
+    });
+
     /** Example listener which logs each published message. */
-    amplify.subscribe("generic", function(data) {
+    amplify.subscribe("client", function(data) {
         console.log(data);
     });
+
+    /** Example polling routine which sends messages back to the server,
+     ** and logs the respones that come back when messages are sent back.
+     */
+    setInterval(function() {
+        amplify.publish("server", { message: "count_clients" });
+    }, 1000);
 
 })();
