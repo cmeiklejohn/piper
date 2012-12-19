@@ -6,7 +6,7 @@ Piper, a system for treating the browser like an Erlang process.
 
 Piper was heavily inspired by Joe Armstrong's [EZWebFrame](https://github.com/joearms/ezwebframe).
 
-Piper diverges from the approach in EZWebFrame in it's handling of
+Piper diverges from the approach in EZWebFrame in its handling of
 calling JavaScript objects.  Rather than sending messages of desired
 JavaScript function calls directly to the browser, Piper provides an
 additional layer of indirection on the client side to allow handling of
